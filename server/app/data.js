@@ -317,10 +317,10 @@ exports.metadata = {
     },
     "palettes": {
       "geo.region": {
-        "asi": ["#ff5872", "#ff5178", "#ff658a", "#da0025", "#fa4e73", "#b2043a"],
-        "eur": ["#ffe700", "#fbdd00", "#fff400", "#fbaf09", "#ffe700", "#b17f4a"],
-        "ame": ["#7feb00", "#5de200", "#81f201", "#00b900", "#b5ea32", "#008d36"],
-        "afr": ["#00d5e9", "#00c8ec", "#00e1ec", "#0098df", "#77dff7", "#0586c6"],
+        "asia": ["#ff5872", "#ff5178", "#ff658a", "#da0025", "#fa4e73", "#b2043a"],
+        "europe": ["#ffe700", "#fbdd00", "#fff400", "#fbaf09", "#ffe700", "#b17f4a"],
+        "americas": ["#7feb00", "#5de200", "#81f201", "#00b900", "#b5ea32", "#008d36"],
+        "africa": ["#00d5e9", "#00c8ec", "#00e1ec", "#0098df", "#77dff7", "#0586c6"],
         "_default": ["#ffb600", "#ffaa14", "#ffc500", "#fb6d19", "#ffb600", "#9b4838"]
       },
       "gdp_pc": {"0": "#62CCE3", "1": "#B4DE79", "2": "#E1CE00", "3": "#F77481"},
@@ -807,9 +807,9 @@ exports.translation = {
   "color/_default": "Single color",
   "check/adaptMinMaxZoom": "Follow bubbles with zoom",
   "check/presentation": "Increase text size for presentation",
-  "region/ame": "America",
-  "region/asi": "Asia",
-  "region/afr": "Africa",
-  "region/eur": "Europe",
+  "region/americas": "America",
+  "region/asia": "Asia",
+  "region/africa": "Africa",
+  "region/europe": "Europe",
   "region/all": "World"
 };
