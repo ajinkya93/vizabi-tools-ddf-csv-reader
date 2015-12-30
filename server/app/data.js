@@ -427,10 +427,10 @@ exports.metadata = {
       "id": "_properties"
     }, {
       "children": [{
-        "children": [{"id": "gini"}],
+        "children": [{"id": "fertility_rate"}],
         "id": "inequality"
-      }, {"id": "gdp_pc"}, {"id": "gdp"}, {"id": "gni_pc_u_usd_cu"}], "id": "economy"
-    }, {"children": [{"id": "lex"}, {"id": "u5mr"}, {"id": "tfr"}], "id": "health"}, {"id": "pop"}, {"id": "_default"}]
+      }, {"id": "life_expectancy"}], "id": "economy"
+    }, {"children": [{"id": "life_expectancy"}], "id": "health"}, {"id": "population"}, {"id": "_default"}]
   },
   "entities": [{"geo": "abkh", "name": "Abkhazia"}, {"geo": "abw", "name": "Aruba"}, {
     "geo": "afg",
@@ -764,11 +764,11 @@ exports.translation = {
   "mount/title": "Number of people by income",
   "mount/extremepoverty": "extreme poverty",
   "popbyage/yearOldsIn": "-year-olds in",
-  "indicator/lex": "Life expectancy",
+  "indicator/life_expectancy": "Life expectancy",
   "indicator/gdp_pc": "GDP per capita",
   "indicator/gdp": "GDP total",
   "indicator/gni_pc_u_usd_cu": "GNI per capita",
-  "indicator/pop": "Population",
+  "indicator/population": "Population",
   "indicator/geo.region": "Region",
   "indicator/geo": "Individual",
   "indicator/time": "Time",
@@ -779,6 +779,7 @@ exports.translation = {
   "indicator/gini": "Gini coefficient",
   "indicator/_default": "Constant",
   "indicator/_indicators": "Indicators",
+  "indicator/fertility_rate": "Fertility Rate",
   "indicator/_properties": "Properties",
   "indicator/economy": "Wealth",
   "indicator/inequality": "Income distribution and inequality",
@@ -786,12 +787,14 @@ exports.translation = {
   "indicator/tfr": "Babies per woman",
   "placeholder/search": "Search",
   "unit/pop": "people",
+  "unit/population": "people",
   "unit/gdp_pc": "$/year",
   "unit/gdp": "$/year",
   "unit/gni_pc_u_usd_cu": "$/year",
   "unit/": "",
   "unit/tfr": "",
-  "unit/lex": "Years",
+  "unit/life_expectancy": "Years",
+  "unit/fertility_rate": "",
   "unit/time": "",
   "unit/u5mr": "deaths under age 5 per 1000 births",
   "unit/gini": "",
