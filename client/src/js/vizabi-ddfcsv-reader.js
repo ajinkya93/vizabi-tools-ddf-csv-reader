@@ -293,6 +293,46 @@ function once(fn) {
   };
 }
 
+var isArray = Array.isArray || function(obj) {
+  return toString.call(obj) === '[object Array]';
+};
+
+function mapRows(original, formatters) {
+
+  function mapRow(value, fmt) {
+    if (!isArray(value)) {
+      return fmt(value);
+    } else {
+      var res = [];
+      for (var i = 0; i < value.length; i++) {
+        res[i] = mapRow(value[i], fmt);
+      }
+      return res;
+    }
+  }
+
+  var columns = Object.keys(formatters);
+  var columns_s = columns.length;
+  original = original.map(function (row) {
+    for (var i = 0; i < columns_s; i++) {
+      var col = columns[i], new_val;
+
+      if (row.hasOwnProperty(col)) {
+        try {
+          new_val = mapRow(row[col], formatters[col]);
+        } catch (e) {
+          console.log(e.message, e.stack);
+          new_val = row[col];
+        }
+        row[col] = new_val;
+      }
+    }
+    return row;
+  });
+
+  return original;
+}
+
 ///////////////////////////////////////////////
 
 Vizabi.Reader.extend('ddfcsv', {
@@ -307,7 +347,7 @@ Vizabi.Reader.extend('ddfcsv', {
     this._basepath = reader_info.path;
     //this._ddfPath = 'https://raw.githubusercontent.com/open-numbers/ddf--gapminder--systema_globalis/master';
     this._ddfPath = 'https://raw.githubusercontent.com/buchslava/ddf--gapminder--systema_globalis/master';
-
+    this._formatters = reader_info.formatters;
     this.indexPath = this._ddfPath + '/ddf--index.csv';
     this.dimensionPath = this._ddfPath + '/ddf--dimensions.csv';
 
@@ -324,12 +364,18 @@ Vizabi.Reader.extend('ddfcsv', {
     // todo: add groupby processing
 
     var _this = this;
+
+    if (query.where) {
+      query.where = mapRows([query.where], _this._formatters)[0];
+    }
+
     _this.queryDescriptor = new QueryDescriptor(query);
 
     if (_this.queryDescriptor.type === GEO) {
       return new Promise(function (resolve) {
         _this.geoProcessing(function () {
           _this._data = _this.getGeoData(_this.queryDescriptor);
+          console.log('!GEO DATA', _this._data);
           resolve();
         });
       });
@@ -359,7 +405,8 @@ Vizabi.Reader.extend('ddfcsv', {
                   for (var geoIndex = 0; geoIndex < geo.length; geoIndex++) {
                     var line = {
                       'geo': geo[geoIndex].geo,
-                      'time': new Date(year + '')
+                      //'time': new Date(year + '')
+                      'time': year + ''
                     };
 
                     if (_this.injectMeasureValues(query, line, geoIndex, year) === true) {
@@ -368,7 +415,7 @@ Vizabi.Reader.extend('ddfcsv', {
                   }
                 }
 
-                _this._data = result;
+                _this._data = _this.format(result);
 
                 console.log('!QUERY', JSON.stringify(query));
                 console.log('!OUT DATA', _this._data);
@@ -387,6 +434,40 @@ Vizabi.Reader.extend('ddfcsv', {
    */
   getData: function () {
     return this._data;
+  },
+
+  format: function(res) {
+    var _this = this;
+
+    //make category an array and fix missing regions
+    res = res.map(function(row) {
+      if(row['geo.cat']) {
+        row['geo.cat'] = [row['geo.cat']];
+      }
+      if(row['geo.region'] || row['geo']) {
+        row['geo.region'] = row['geo.region'] || row['geo'];
+      }
+      return row;
+    });
+
+    //format data
+    res = mapRows(res, _this._formatters);
+
+    //TODO: fix this hack with appropriate ORDER BY
+    //      plus do it AFTER parsing so you dont sort unneeded rows
+    //order by formatted
+    //sort records by time
+    var keys = Object.keys(_this._formatters);
+    var order_by = keys[0];
+    //if it has time
+    if(res[0][order_by]) {
+      res.sort(function(a, b) {
+        return a[order_by] - b[order_by];
+      });
+    }
+    //end of hack
+
+    return res;
   },
 
   geoProcessing: function (cb) {
