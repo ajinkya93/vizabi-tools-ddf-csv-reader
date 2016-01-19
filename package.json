@@ -1,12 +1,12 @@
 {
-  "name": "GapminderToolsPage",
-  "version": "0.8.3",
-  "description": "Gapminder Tools Page",
+  "name": "GapminderDDFToolsPage",
+  "version": "0.12.1",
+  "description": "Gapminder DDF Tools Page",
   "repository": {
     "type": "git",
-    "url": "http://gapminder.org/tools"
+    "url": "https://github.com/valor-software/vizabi-ddfcsv-tool"
   },
-  "author": "Arthur Camara",
+  "author": "Vyacheslav Chub",
   "scripts": {
     "dev": "NODE_ENV=development webpack-dev-server --inline --hot --progress --color",
     "build": "NODE_ENV=development webpack",
@@ -51,6 +51,6 @@
     "node-bourbon": "4.2.3",
     "redis": "2.2.5",
     "request": "2.67.0",
-    "vizabi": "^0.12.0"
+    "vizabi": "0.12.1"
   }
 }

@@ -16,7 +16,7 @@ module.exports = function (app) {
   var router = express.Router();
   /* API Routes */
 
-  router.get('/item', compression(), function (req, res) {
+  /*router.get('/item', compression(), function (req, res) {
     return res.json(data.items);
   });
 
@@ -41,7 +41,7 @@ module.exports = function (app) {
 
   _.forEach(valueKey, function (value, key) {
     app.get('/api/static/data/' + key, compression(), valueKey[key]);
-  });
+  });*/
 
   /* APP Routes */
   app.get('/', function (req, res) {

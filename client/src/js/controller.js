@@ -1,95 +1,151 @@
+var _ = require('lodash');
 var Vizabi = require('vizabi');
+
+var ddfUtils = require('./vizabi-ddf-utils');
+var queryTemplate = require('./templates/query').queryTemplate;
+var metadataTemplate = require('./templates/metadata').metadataTemplate;
+var translationsTemplate = require('./templates/translations').translationsTemplate;
+
+function safeApply(scope, fn) {
+  var phase = scope.$root.$$phase;
+  if (phase == '$apply' || phase == '$digest') {
+    scope.$eval(fn);
+  } else {
+    scope.$apply(fn);
+  }
+}
 
 module.exports = function (app) {
   app
     .controller('gapminderToolsCtrl', [
-      '$scope', '$route', '$routeParams', '$location', 'vizabiItems', 'vizabiFactory', '$window',
-      function ($scope, $route, $routeParams, $location, vizabiItems, vizabiFactory, $window) {
-        var placeholder = document.getElementById('vizabi-placeholder');
+      '$scope', '$timeout',
+      function ($scope, $timeout) {
+        $scope.lastTab = -1;
+        $scope.tabs = [];
 
-        $scope.loadingError = false;
-        $scope.tools = {};
-        $scope.validTools = [];
-        $scope.relatedItems = [];
+        $scope.ddf = {
+          url: 'https://raw.githubusercontent.com/open-numbers/ddf--gapminder--systema_globalis/master',
+          type: 'BubbleChart',
+          types: [
+            {value: 'BubbleChart', name: 'Bubble Chart'},
+            {value: 'MountainChart', name: 'Mountain Chart'}
+          ],
+          measures: [],
+          dimensions: [],
+          popup: false,
+          xAxis: '',
+          yAxis: '',
+          sizeAxis: ''
+        };
 
-        //start off by getting all items
-        vizabiItems.getItems().then(function (items) {
-          $scope.tools = items;
-          $scope.validTools = Object.keys($scope.tools);
-          updateGraph();
-        });
+        $scope.setTab = function (tabId) {
+          $scope.currentTab = tabId;
+        };
 
-        var prevSlug = null;
-        $scope.$root.$on('$routeChangeStart', function(event, state){
-          var newSlug = state.params.slug;
-          if (!prevSlug) {
-            prevSlug = newSlug;
-            return;
-          }
-          if (prevSlug !== newSlug) {
-            prevSlug = newSlug;
-            // and here we go, one more hack
-            setTimeout(function () {
-              window.location.href = window.location.href;
-            }, 1);
-            return;
-          }
-          console.log(window.location.hash);
-        });
-        $scope.$root.$on('$routeUpdate', function(event, state){
-          var newSlug = state.params.slug;
-          if (!prevSlug) {
-            prevSlug = newSlug;
-            return;
-          }
-          if (prevSlug !== newSlug) {
-            prevSlug = newSlug;
-            // and here we go, one more hack
-            setTimeout(function () {
-              window.location.href = window.location.href;
-            }, 1);
-            return;
-          }
-          console.log(window.location.hash);
-        });
-        function updateGraph() {
-          var validTools = $scope.validTools;
-          if (validTools.length === 0) return;
-          if (validTools.indexOf($routeParams.slug) === -1) {
-            //redirect
-            $location.path('/' + validTools[0]);
-            return;
-          }
-
-          scrollTo(document.querySelector('.wrapper'), 0, 200, function () {
-            $scope.activeTool = $routeParams.slug;
-            // do not put data in $scope
-            var tool = angular.copy($scope.tools[$scope.activeTool]);
-
-            Vizabi.clearInstances();
-
-            $scope.viz = vizabiFactory.render(tool.tool, placeholder, tool.opts);
-            $scope.relatedItems = tool.relateditems;
-            $scope.$apply();
-
-            //send to google analytics
-            $window.ga('send', 'pageview', {page: $location.url()});
-          });
-        }
-
-        function scrollTo(element, to, duration, cb) {
-          if (duration < 0) return;
-          var difference = to - element.scrollTop;
-          var perTick = difference / duration * 10;
-
-          setTimeout(function () {
-            element.scrollTop = element.scrollTop + perTick;
-            if (element.scrollTop == to) {
-              cb();
+        $scope.loadDdf = function () {
+          ddfUtils.getDimensions($scope.ddf.url, function (err, result) {
+            if (err) {
+              console.log(err);
               return;
             }
-            scrollTo(element, to, duration - 10, cb);
-          }, 10);
-        }
+
+            $scope.ddf.dimensions = result;
+
+            ddfUtils.getMeasures($scope.ddf.url, function (err, result) {
+              if (err) {
+                console.log(err);
+                return;
+              }
+
+              safeApply($scope, function () {
+                $scope.ddf.measures = result;
+                $scope.ddf.popup = true;
+              });
+            });
+          });
+        };
+
+        $scope.closeDdf = function () {
+          $scope.ddf.popup = false;
+        };
+
+        $scope.openDdf = function () {
+          if ($scope.tabs.length === 0) {
+            $scope.newTab();
+          }
+          $timeout(function () {
+            var placeholder = document.getElementById('vizabi-placeholder' + $scope.lastTab);
+            queryTemplate.data.path = $scope.ddf.url;
+            queryTemplate.state.marker.axis_y.which = $scope.ddf.yAxis;
+            queryTemplate.state.marker.axis_x.which = $scope.ddf.xAxis;
+            queryTemplate.state.marker.size.which = $scope.ddf.sizeAxis;
+
+            $scope.ddf.dimensions.forEach(function (dimension) {
+              var name = dimension.type === 'dimension' ?
+                dimension.concept : dimension.subdim_of + '.' + dimension.concept;
+              metadataTemplate.indicatorsDB[name] = {
+                allowCharts: ['*'],
+                use: 'property',
+                unit: '',
+                scales: ['ordinal'],
+                sourceLink: dimension.link || ''
+              };
+            });
+
+            var measuresPlain = [];
+            $scope.ddf.measures.forEach(function (measure) {
+              measuresPlain.push(measure.measure);
+              metadataTemplate.indicatorsDB[measure.measure] = {
+                allowCharts: ['mountainchart', 'bubblechart', 'bubblemap'],
+                use: 'indicator',
+                unit: measure.unit,
+                scales: ['linear'],
+                sourceLink: ''
+              };
+              // todo: temporary solution: consider real
+              metadataTemplate.indicatorsTree.children[2].children.push({
+                id: measure.measure
+              });
+
+              translationsTemplate['indicator/' + measure.measure] = measure.name;
+              translationsTemplate['unit/' + measure.unit] = measure.unit;
+            });
+
+            metadataTemplate.indicatorsDB._default = {
+              allowCharts: ['*'],
+              use: 'constant',
+              unit: '',
+              scales: ['ordinal'],
+              sourceLink: ''
+            };
+
+            $scope.ddf.popup = false;
+
+            Vizabi.Tool.define('preload', function (promise) {
+              Vizabi._globals.metadata = metadataTemplate;
+              Vizabi._globals.metadata.indicatorsArray = measuresPlain;
+              this.model.language.strings.set(this.model.language.id, translationsTemplate);
+              promise.resolve();
+            });
+
+            var placeholder = document.getElementById('vizabi-placeholder');
+            console.log($scope.ddf.type, placeholder, queryTemplate);
+
+            Vizabi($scope.ddf.type, placeholder, queryTemplate);
+          }, 0);
+        };
+
+        $scope.newTab = function () {
+          ++$scope.lastTab;
+          $scope.tabs.push({id: $scope.lastTab});
+          $scope.setTab($scope.lastTab);
+        };
+
+        $scope.closeTab = function (tabId) {
+          if (tabId === $scope.currentTab) {
+            --$scope.currentTab;
+          }
+          $scope.tabs = _.without($scope.tabs, _.findWhere($scope.tabs, {id: tabId}));
+        };
       }]);
 };
