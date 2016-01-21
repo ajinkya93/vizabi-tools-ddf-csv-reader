@@ -64,5 +64,6 @@ exports.translationsTemplate = {
   "region/asia": "Asia",
   "region/africa": "Africa",
   "region/europe": "Europe",
-  "region/all": "World"
+  "region/all": "World",
+  "unit/mountainchart_hardcoded_income_per_day": "$/day"
 };

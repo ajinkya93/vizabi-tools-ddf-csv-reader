@@ -12,8 +12,7 @@ Vizabi.Reader.extend('ddfcsv', {
   init: function (reader_info) {
     this._name = 'ddf-csv';
     this._data = [];
-    this._ddfPath = 'https://raw.githubusercontent.com/open-numbers/ddf--gapminder--systema_globalis/master';
-    this._formatters = reader_info.formatters;
+    this._ddfPath = reader_info.ddfPath;
     this._formatters = reader_info.formatters;
   },
 
@@ -107,6 +106,16 @@ Vizabi.Reader.extend('ddfcsv', {
       }
     });
 
+    if (query.select.indexOf('geo.latitude') > 0) {
+      line['geo.latitude'] = geo[geoIndex]['geo.latitude'];
+      ++f;
+    }
+
+    if (query.select.indexOf('geo.longitude') > 0) {
+      line['geo.longitude'] = geo[geoIndex]['geo.longitude'];
+      ++f;
+    }
+
     return f === measures.length;
   },
 
@@ -117,7 +126,9 @@ Vizabi.Reader.extend('ddfcsv', {
           geo: geoRecord.geo,
           'geo.name': geoRecord.name,
           'geo.cat': queryDescriptor.category,
-          'geo.region': geoRecord.world_4region
+          'geo.region': geoRecord.world_4region,
+          'geo.latitude': geoRecord.latitude,
+          'geo.longitude': geoRecord.longitude
         }
       }
     };

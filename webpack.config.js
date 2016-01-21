@@ -107,6 +107,18 @@ var wConfig = {
       template: path.join(config.src, '404.html'),
       chunks: ['angular', 'vizabi-tools'],
       minify: true
+    }),
+    new HtmlWebpackPlugin({
+      filename: 'config/world-50m.json',
+      template: path.join(config.src, 'config/world-50m.json'),
+      chunks: ['angular', 'vizabi-tools'],
+      minify: true
+    }),
+    new HtmlWebpackPlugin({
+      filename: '/config/mc_precomputed_shapes.json',
+      template: path.join(config.src, 'config/mc_precomputed_shapes.json'),
+      chunks: ['angular', 'vizabi-tools'],
+      minify: true
     })
   ],
   pushPlugins: function () {

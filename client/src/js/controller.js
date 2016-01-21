@@ -24,11 +24,12 @@ module.exports = function (app) {
         $scope.tabs = [];
 
         $scope.ddf = {
-          url: 'https://raw.githubusercontent.com/open-numbers/ddf--gapminder--systema_globalis/master',
+          url: 'https://raw.githubusercontent.com/valor-software/ddf--gapminder--systema_globalis/master',
           type: 'BubbleChart',
           types: [
             {value: 'BubbleChart', name: 'Bubble Chart'},
-            {value: 'MountainChart', name: 'Mountain Chart'}
+            {value: 'MountainChart', name: 'Mountain Chart'},
+            {value: 'BubbleMap', name: 'Bubble Map'}
           ],
           measures: [],
           dimensions: [],
@@ -58,7 +59,9 @@ module.exports = function (app) {
               }
 
               safeApply($scope, function () {
-                $scope.ddf.measures = result;
+                $scope.ddf.measures = result.filter(function (v) {
+                  return !!v.measure;
+                });
                 $scope.ddf.popup = true;
               });
             });
@@ -70,15 +73,23 @@ module.exports = function (app) {
         };
 
         $scope.openDdf = function () {
+          var queryObj = queryTemplate[$scope.ddf.type];
           if ($scope.tabs.length === 0) {
+            //if there are no tabs - create one
             $scope.newTab();
           }
+          //render graph when tab is rendered
           $timeout(function () {
-            var placeholder = document.getElementById('vizabi-placeholder' + $scope.lastTab);
-            queryTemplate.data.path = $scope.ddf.url;
-            queryTemplate.state.marker.axis_y.which = $scope.ddf.yAxis;
-            queryTemplate.state.marker.axis_x.which = $scope.ddf.xAxis;
-            queryTemplate.state.marker.size.which = $scope.ddf.sizeAxis;
+            if ($scope.ddf.type === 'BubbleChart' || $scope.ddf.type === 'MountainChart') {
+              queryObj.data.path = $scope.ddf.url;
+              queryObj.state.marker.axis_y.which = $scope.ddf.yAxis;
+              queryObj.state.marker.axis_x.which = $scope.ddf.xAxis;
+              queryObj.state.marker.size.which = $scope.ddf.sizeAxis;
+            }
+
+            if ($scope.ddf.type === 'BubbleMap') {
+              queryObj.state.marker.size.which = $scope.ddf.sizeAxis;
+            }
 
             $scope.ddf.dimensions.forEach(function (dimension) {
               var name = dimension.type === 'dimension' ?
@@ -128,10 +139,9 @@ module.exports = function (app) {
               promise.resolve();
             });
 
+            queryObj.data.ddfPath = $scope.ddf.url;
             var placeholder = document.getElementById('vizabi-placeholder');
-            console.log($scope.ddf.type, placeholder, queryTemplate);
-
-            Vizabi($scope.ddf.type, placeholder, queryTemplate);
+            Vizabi($scope.ddf.type, placeholder, queryObj);
           }, 0);
         };
 

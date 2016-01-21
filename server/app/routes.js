@@ -14,38 +14,17 @@ var request = require('request');
 
 module.exports = function (app) {
   var router = express.Router();
-  /* API Routes */
 
-  /*router.get('/item', compression(), function (req, res) {
-    return res.json(data.items);
-  });
-
-  router.get('/menu', compression(), function (req, res) {
-    return res.json(data.menu);
-  });
-
-  var base = path.join(BASEURL, 'api');
-  app.use(base, router);
-
-  var valueKey = {
-    'translation/:lang': function (req, res) {
-      return res.json(data.translation);
-    },
-    'waffles/metadata.json': function (req, res) {
-      return res.json(data.metadata);
-    },
-    'mc_precomputed_shapes.json': function (req, res) {
-      return res.json({});
-    }
-  };
-
-  _.forEach(valueKey, function (value, key) {
-    app.get('/api/static/data/' + key, compression(), valueKey[key]);
-  });*/
-
-  /* APP Routes */
   app.get('/', function (req, res) {
     return res.sendFile(path.resolve('./client/dist' + BASEURL + 'redirect.html'));
+  });
+
+  app.get('/preview/data/mc_precomputed_shapes.json', function (req, res) {
+    return res.sendFile(path.resolve('./client/dist' + BASEURL + 'config/mc_precomputed_shapes.json'));
+  });
+
+  app.get('/preview/data/world-50m.json', function (req, res) {
+    return res.sendFile(path.resolve('./client/dist' + BASEURL + 'config/world-50m.json'));
   });
 
   app.get('*', function (req, res) {

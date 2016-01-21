@@ -38,35 +38,45 @@
     </div>
 
     <div class="pre-popup" ng-if="ddf.popup === true">
-      <div class="popup-block">
-        X axis:
-        <select ng-model="ddf.xAxis">
-          <option value="">choose measure</option>
-          <option ng-repeat="xAxis in ddf.measures" value="{{xAxis.measure}}">{{xAxis.name}}</option>
-        </select>
+      <div ng-if="ddf.type === 'BubbleChart' || ddf.type === 'MountainChart'">
+        <div class="popup-block">
+          X axis:
+          <select ng-model="ddf.xAxis">
+            <option value="">choose measure</option>
+            <option ng-repeat="axis in ddf.measures" value="{{axis.measure}}">{{axis.name}}</option>
+          </select>
+        </div>
+        <div class="popup-block">
+          Y axis:
+          <select ng-model="ddf.yAxis">
+            <option value="">choose measure</option>
+            <option ng-repeat="axis in ddf.measures" value="{{axis.measure}}">{{axis.name}}</option>
+          </select>
+        </div>
+        <div class="popup-block">
+          Size axis:
+          <select ng-model="ddf.sizeAxis">
+            <option value="">choose measure</option>
+            <option ng-repeat="axis in ddf.measures" value="{{axis.measure}}">{{axis.name}}</option>
+          </select>
+        </div>
       </div>
-      <div class="popup-block">
-        Y axis:
-        <select ng-model="ddf.yAxis">
-          <option value="">choose measure</option>
-          <option ng-repeat="xAxis in ddf.measures" value="{{xAxis.measure}}">{{xAxis.name}}</option>
-        </select>
-      </div>
-      <div class="popup-block">
-        Size axis:
-        <select ng-model="ddf.sizeAxis">
-          <option value="">choose measure</option>
-          <option ng-repeat="xAxis in ddf.measures" value="{{xAxis.measure}}">{{xAxis.name}}</option>
-        </select>
+      <div ng-if="ddf.type === 'BubbleMap'">
+        <div class="popup-block">
+          Size measure:
+          <select ng-model="ddf.sizeAxis">
+            <option value="">choose measure</option>
+            <option ng-repeat="axis in ddf.measures" value="{{axis.measure}}">{{axis.name}}</option>
+          </select>
+        </div>
       </div>
       <div class="popup-footer">
         <input type="button"
-               ng-disabled="!ddf.xAxis || !ddf.yAxis || !ddf.sizeAxis"
+               ng-disabled="((ddf.type === 'BubbleChart' || ddf.type === 'MountainChart') && (!ddf.xAxis || !ddf.yAxis || !ddf.sizeAxis)) || (ddf.type === 'BubbleMap' && !ddf.sizeAxis)"
                ng-click="openDdf()"
                value="Go" />
         <input type="button" ng-click="closeDdf()" value="Close" />
       </div>
-
     </div>
 
   </div>
