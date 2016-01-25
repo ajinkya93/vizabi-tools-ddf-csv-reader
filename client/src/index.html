@@ -9,7 +9,7 @@
   <link href="{%= o.htmlWebpackPlugin.files.css[prop] %}" rel="stylesheet" type="text/css">
   {% } %}
   <link href="./favicon.ico" rel="shortcut icon">
-  <link href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet"/>
 </head>
 <body ng-controller="gapminderToolsCtrl">
 <div class="wrapper">
@@ -21,7 +21,7 @@
 
     <div style="margin-top: 15px;">
       <form class="form-inline" role="form">
-        <!--<button ng-click="newTab()">new tab</button>-->
+        <button ng-click="newTab()">new tab</button>
         <div class="form-group">
           <select ng-model="ddf.type" class="form-control">
             <option value="">choose graph type</option>
@@ -81,18 +81,21 @@
 
   </div>
 
-  <!--<div>
+  <div>
     <ul class="nav nav-tabs">
-      <li ng-repeat="tab in tabs">
-        <a ng-class="{'active': tab.id === currentTab}"
-           ng-click="setTab(tab.id)">
-          <button class="close closeTab" type="button" ng-click="closeTab(tab.id)">×</button> tab #{{tab.id}}</a>
+      <li ng-class="{'active': tab.id === currentTab}" ng-repeat="tab in tabs">
+        <a ng-click="setTab(tab.id)">
+          <button style="padding-left: 10px;" class="close" type="button" ng-click="closeTab(tab.id)">×</button> tab #{{tab.id}}</a>
       </li>
     </ul>
-  </div>-->
+  </div>
 
   <!--Content-->
-  <div class="column main" id="vizabi-placeholder"></div>
+  <div ng-repeat="tab in tabs"
+       class="column main"
+       ng-show="currentTab === tab.id"
+       id="vizabi-placeholder{{tab.id}}">
+  </div>
 
 </div>
 

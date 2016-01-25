@@ -22,6 +22,7 @@ module.exports = function (app) {
       function ($scope, $timeout) {
         $scope.lastTab = -1;
         $scope.tabs = [];
+        $scope.componentIdInTab = {};
 
         $scope.ddf = {
           url: 'https://raw.githubusercontent.com/valor-software/ddf--gapminder--systema_globalis/master',
@@ -40,6 +41,10 @@ module.exports = function (app) {
         };
 
         $scope.setTab = function (tabId) {
+          if ($scope.componentIdInTab[tabId]) {
+            Vizabi._instances[$scope.componentIdInTab[tabId]].resize();
+          }
+
           $scope.currentTab = tabId;
         };
 
@@ -140,9 +145,11 @@ module.exports = function (app) {
             });
 
             queryObj.data.ddfPath = $scope.ddf.url;
-            var placeholder = document.getElementById('vizabi-placeholder');
-            Vizabi($scope.ddf.type, placeholder, queryObj);
-          }, 0);
+            var placeholder = document.getElementById('vizabi-placeholder' + $scope.lastTab);
+
+            var i = Vizabi($scope.ddf.type, placeholder, queryObj);
+            $scope.componentIdInTab[$scope.lastTab] = i._id;
+          }, 10);
         };
 
         $scope.newTab = function () {
