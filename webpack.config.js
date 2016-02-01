@@ -1,171 +1,131 @@
-'use strict';
-/*eslint no-process-env:0*/
-
-var path = require('path');
-var Clean = require('clean-webpack-plugin');
 var webpack = require('webpack');
-var HtmlWebpackPlugin = require('html-webpack-plugin');
-var ExtractTextPlugin = require('extract-text-webpack-plugin');
-var CompressionPlugin = require('compression-webpack-plugin');
+var path = require('path');
 
-var bourbon = require('node-bourbon').includePaths;
+var CompressionPlugin = require('compression-webpack-plugin');
+var CopyWebpackPlugin = require('copy-webpack-plugin');
+
+/*eslint no-process-env:0, camelcase:0*/
+var isProduction = (process.env.NODE_ENV || 'development') === 'production';
+
+var src = './src';
+//var absSrc = path.join(__dirname, src);
+var dest = '/build';
+var absDest = path.join(__dirname, dest);
 
 var config = {
-  template: 'index.html',
-  index: 'index.html',
-  src: './client/src',
-  dest: './client/dist/tools',
-  publicPath: '/tools/'
-};
+  // isProduction ? 'source-map' : 'evale',
+  devtool: 'source-map',
 
-var isProduction = process.env.NODE_ENV === 'production';
-
-var absSrc = path.join(__dirname, config.src);
-var absDest = path.join(__dirname, config.dest);
-var wConfig = {
   debug: true,
-  profile: true,
   cache: true,
-  devtool: isProduction ? 'sourcemaps' : 'eval',
-  context: path.join(__dirname, config.src),
-  entry: {
-    'vizabi-tools': './js/app.js',
-    angular: ['angular', 'angular-route', 'angular-touch', 'd3']
+  context: __dirname,
+
+  resolve: {
+    root: __dirname,
+    extensions: ['', '.ts', '.js', '.json'],
+    alias: {}
   },
+
+  entry: {
+    app: [src + '/index'],
+    vendor: [src + '/vendor']
+  },
+
   output: {
     path: absDest,
-    publicPath: config.publicPath,
-    filename: 'components/[name]-[hash:6].js',
-    chunkFilename: 'components/[name]-[hash:6].js'
+    filename: '[name].js',
+    sourceMapFilename: '[name].js.map',
+    chunkFilename: '[id].chunk.js'
   },
-  resolve: {
-    root: [absSrc],
-    modulesDirectories: ['./components', 'node_modules'],
-    extensions: ['', '.js', '.png', '.gif', '.jpg']
+
+  // our Development Server configs
+  devServer: {
+    inline: true,
+    colors: true,
+    historyApiFallback: true,
+    contentBase: src,
+    publicPath: dest,
+    proxy: {
+      '*preview/data*': 'http://localhost:3001'
+    }
   },
   module: {
-    //noParse: new RegExp(require.resolve("vizabi"), 'ig'),
     loaders: [
+      // Support for *.json files.
+      {test: /\.json$/, loader: 'json'},
+
+      // Support for CSS as raw text
+      {test: /\.css$/, loader: 'raw'},
+
+      // support for .html as raw text
+      {test: /\.html$/, loader: 'raw'},
+
+      // Support for .ts files
       {
-        test: /vizabi\.js/,
-        loader: 'imports?this=>window,d3'
-      },
-      {
-        test: /\.scss/,
-        //loader: 'style!css!sass?includePaths[]=' + bourbon
-        loader: ExtractTextPlugin.extract('style-loader', 'css-loader?sourceMap&root=' + absSrc + '!sass-loader?includePaths[]=' + bourbon)
-      },
-      {
-        test: /\.css$/,
-        loader: ExtractTextPlugin.extract('style-loader', 'css-loader?sourceMap&root=' + absSrc)
-        //loader: 'style!css'//?root=' + absSrc
-      },
-      {
-        test: /.*\.(gif|png|jpe?g)$/i,
-        loaders: [
-          'file?hash=sha512&digest=hex&name=[path][name].[ext]',
-          'image-webpack?{progressive:true, optimizationLevel: 7, interlaced: false, pngquant:{quality: "65-90", speed: 4}}'
+        test: /\.ts$/,
+        loader: 'ts',
+        exclude: [
+          /\.min\.js$/,
+          /\.spec\.ts$/,
+          /\.e2e\.ts$/
         ]
-      },
-      {
-        test: /\.html$/,
-        loader: 'html?name=[path][name].[ext]&root=' + absSrc
-      },
-      {
-        test: /\.woff(\?v=\d+\.\d+\.\d+)?$/,
-        loader: 'url?name=[path][name].[ext]&limit=10000&mimetype=application/font-woff'
-      },
-      {
-        test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/,
-        loader: 'url?name=[path][name].[ext]&limit=10000&mimetype=application/font-woff'
-      },
-      {
-        test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
-        loader: 'url?name=[path][name].[ext]&limit=10000&mimetype=application/octet-stream'
-      },
-      {test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, loader: 'file?name=[path][name].[ext]'},
-      {
-        test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
-        loader: 'url?name=[path][name].[ext]&limit=10000&mimetype=image/svg+xml'
       }
+
+    ],
+    noParse: [
+      /rtts_assert\/src\/rtts_assert/,
+      /angular2\/bundles\/.+/
     ]
   },
+
   plugins: [
-    new Clean([config.dest]),
-    new webpack.DefinePlugin({
-      _isDev: !isProduction
+    new webpack.optimize.CommonsChunkPlugin({
+      name: 'vendor',
+      minChunks: Infinity,
+      filename: 'vendor.bundle.js'
     }),
-    new ExtractTextPlugin('[name]-[hash:6].css'),
-    new HtmlWebpackPlugin({
-      filename: config.index,
-      template: path.join(config.src, config.template),
-      chunks: ['angular', 'vizabi-tools'],
-      minify: true
+    new webpack.optimize.DedupePlugin({
+      __isProduction: isProduction
     }),
-    new HtmlWebpackPlugin({
-      filename: '404.html',
-      template: path.join(config.src, '404.html'),
-      chunks: ['angular', 'vizabi-tools'],
-      minify: true
-    }),
-    new HtmlWebpackPlugin({
-      filename: 'config/world-50m.json',
-      template: path.join(config.src, 'config/world-50m.json'),
-      chunks: ['angular', 'vizabi-tools'],
-      minify: true
-    }),
-    new HtmlWebpackPlugin({
-      filename: '/config/mc_precomputed_shapes.json',
-      template: path.join(config.src, 'config/mc_precomputed_shapes.json'),
-      chunks: ['angular', 'vizabi-tools'],
-      minify: true
-    })
+    new webpack.optimize.OccurenceOrderPlugin(),
+    new webpack.optimize.DedupePlugin(),
+    new CopyWebpackPlugin([
+      {from: 'node_modules/vizabi/build/dist', to: 'vizabi'},
+      {from: 'node_modules/d3', to: 'd3'},
+      {from: 'src/styles', to: 'styles'}
+
+    ])
   ],
   pushPlugins: function () {
     if (!isProduction) {
       return;
     }
 
-    console.log('Adding production plugins');
     this.plugins.push.apply(this.plugins, [
-      // production only
-      new webpack.optimize.UglifyJsPlugin(),
+       //production only
+      new webpack.optimize.UglifyJsPlugin({
+        compress: {
+          warnings: false,
+          drop_debugger: false
+        },
+        output: {
+          comments: false
+        },
+        beautify: false
+      }),
       new CompressionPlugin({
         asset: '{file}.gz',
         algorithm: 'gzip',
-        regExp: /\.js$|\.html$|\.css$|\.map$|\.woff$|\.woff2$|\.ttf$|\.eot$|\.svg$/,
+        regExp: /\.js$|\.html|\.css|.map$/,
         threshold: 10240,
         minRatio: 0.8
       })
     ]);
   },
-  stats: {colors: true, progress: true, children: false},
-  devServer: {
-    contentBase: config.dest,
-    publicPath: config.publicPath,
-    noInfo: true,
-    hot: true,
-    inline: true,
-    historyApiFallback: {
-      index: config.index,
-      logger: console.log.bind(console),
-      verbose: true,
-      rewrites: [
-        {
-          from: /^\/$|^\/tools.*$/,
-          to: function(context) {
-            return '/tools/';
-          }
-        }
-      ]
-    },
-    devtool: 'eval',
-    proxy: {
-      '*/api/*': 'http://localhost:' + (process.env.PORT || '3001')
-    }
-  }
+
+  stats: {colors: true, reasons: true}
 };
 
-wConfig.pushPlugins();
+config.pushPlugins();
 
-module.exports = wConfig;
+module.exports = config;

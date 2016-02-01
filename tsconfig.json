@@ -1,0 +1,25 @@
+{
+  "version": "1.6.2",
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "sourceMap": true,
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "listFiles": false,
+    "noLib": false
+  },
+  "exclude": [
+    "node_modules"
+  ],
+  "files": [
+    "src/index.ts",
+    "src/data-service.ts",
+    "src/header.ts",
+    "src/settings.ts",
+    "src/container.ts",
+    "src/vendor.ts"
+  ]
+}
