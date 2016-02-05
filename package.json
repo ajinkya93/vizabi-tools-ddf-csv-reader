@@ -4,10 +4,10 @@
   "description": "Vizabi Tools DDF-CSV Reader Angular2",
   "main": "index.js",
   "scripts": {
-    "deploy": "NODE_ENV=production webpack -p --progress --color --optimize-minimize --optimize-dedupe --optimize-occurence-order",
-    "dev": "webpack-dev-server --progress --display-cached --hot --inline --colors --display-error-details --display-cached --port 3000",
-    "start": "concurrent --kill-others 'node server.js' 'npm run dev'",
-    "test": "gulp lint"
+    "deploy": "NODE_ENV=production ./node_modules/.bin/webpack -p --progress --color --optimize-minimize --optimize-dedupe --optimize-occurence-order",
+    "dev": "./node_modules/.bin/webpack-dev-server --progress --display-cached --hot --inline --colors --display-error-details --display-cached --port 3000",
+    "start": "./node_modules/.bin/concurrent --kill-others 'node server.js' 'npm run dev'",
+    "test": "./node_modules/.bin/gulp lint"
   },
   "keywords": [
     "angular2",
@@ -27,26 +27,27 @@
   },
   "homepage": "https://github.com/valor-software/angular2-bootstrap-starter#readme",
   "dependencies": {
-    "es6-promise": "3.0.2",
-    "es6-shim": "0.33.13",
-    "reflect-metadata": "0.1.2",
-    "rxjs": "5.0.0-beta.0",
-    "zone.js": "0.5.10",
     "angular2": "2.0.0-beta.2",
-    "ng2-bootstrap": "1.0.2-beta.0",
     "body-parser": "1.14.2",
     "compression": "1.6.1",
+    "concurrently": "1.0.0",
     "connect-gzip-static": "1.0.0",
+    "d3": "3.5.6",
+    "es6-promise": "3.0.2",
+    "es6-shim": "0.33.13",
     "express": "4.13.4",
     "http": "0.0.0",
     "lodash": "3.10.1",
     "method-override": "2.3.5",
     "morgan": "1.6.1",
+    "ng2-bootstrap": "1.0.2-beta.0",
     "path": "0.12.7",
+    "reflect-metadata": "0.1.2",
     "request": "2.69.0",
+    "rxjs": "5.0.0-beta.0",
     "url": "0.11.0",
-    "d3": "3.5.6",
-    "vizabi": "0.12.5-2"
+    "vizabi": "0.12.5-2",
+    "zone.js": "0.5.10"
   },
   "devDependencies": {
     "babel-eslint": "^5.0.0-beta6",
